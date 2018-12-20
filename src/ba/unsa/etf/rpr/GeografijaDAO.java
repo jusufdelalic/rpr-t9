@@ -18,9 +18,9 @@ import java.util.Collections;
 
 public class GeografijaDAO {
     private static GeografijaDAO instance = null;
-    private Connection conn;
+    private static Connection conn;
     private Statement stmt;
-    // private String url = "jdbc:sqlite:baza.db"; // ?????
+    private String url = "jdbc:sqlite:baza.db"; // ?????
     private PreparedStatement upit;
     private ArrayList<Grad> gradovi;
     private ArrayList<Drzava> drzave;
@@ -53,19 +53,43 @@ public class GeografijaDAO {
         drzave.add(austrija);
     }
 
+    public void kreirajTabele () throws SQLException {
+
+        String sql = "CREATE TABLE IF NOT EXISTS gradovi(\n"
+                + " id integer PRIMARY KEY,\n"
+                + " naziv text NOT NULL UNIQUE,\n"
+                + " brojStanovnika integer,\n"
+                + " drzava integer,\n"
+                + " FOREIGN KEY (drzava) REFERENCES drzave (id) ON DELETE CASCADE\n"
+                + ");";
+
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        stmt.execute();
+
+        //Tabela drzava sadrži kolone: id (int, primarni ključ), naziv (text), glavni_grad (int, strani ključ)
+
+        sql = "CREATE TABLE IF NOT EXISTS drzave(\n"
+                + " id integer PRIMARY KEY,\n"
+                + " naziv text NOT NULL UNIQUE,\n"
+                + " glavni_grad integer\n"
+                + " FOREIGN KEY (glavni_grad) REFERENCES gradovi(id) ON DELETE CASCADE\n"
+                + ");";
+
+        stmt = conn.prepareStatement(sql);
+        stmt.execute();
+
+    }
+
     private GeografijaDAO() {
         gradovi = new ArrayList<>();
         drzave = new ArrayList<>();
-        napuniPodacima();
+
         try {
             Class.forName("com.mysql.jdbc.Driver");
-        } catch (Exception e) {
+            conn = DriverManager.getConnection(url);
+            kreirajTabele();
+            napuniPodacima();
 
-            System.out.println("Greska prilikom uspostavljanja veze sa bazom podataka");
-
-        }
-        try {
-            //conn = DriverManager.getConnection(url);
 
             upit = conn.prepareStatement("INSERT INTO grad VALUES (?, ?, ?, NULL)");
             for (var grad : gradovi) {
@@ -96,7 +120,7 @@ public class GeografijaDAO {
                 } catch (SQLException ignored) {
                 }
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
@@ -111,6 +135,15 @@ public class GeografijaDAO {
         return instance;
     }
 
+    public void obrisiDrzavu(String drzava) {
+        for (int i = 0; i < drzave.size(); i++) {
+            if (drzave.get(i).getNaziv().equals(drzava)) {
+                drzave.remove(i);
+                break;
+            }
+        }
+    }
+
     public ArrayList<Grad> gradovi() {
 
         for(int i=0; i<gradovi.size(); i++)
@@ -120,14 +153,51 @@ public class GeografijaDAO {
                     Collections.swap(gradovi, i, j);
             }
 
-        return gradovi; //Treba sortirati po broju stanovnika u opadajucem redosljedu
+        return gradovi;
     }
 
-    /*
-
-    ...
 
 
-     */
+
+    public Grad glavniGrad(String drzava) {
+        for (int i = 0; i < drzave.size(); i++) {
+            if (drzave.get(i).getNaziv().equals(drzava))
+                return drzave.get(i).getGlavniGrad();
+        }
+        return null;
+    }
+
+    public Drzava nadjiDrzavu(String drzava) {
+        for (int i = 0; i < drzave.size(); i++) {
+            if (drzave.get(i).getNaziv().equals(drzava))
+                return drzave.get(i);
+        }
+        return null;
+    }
+
+    public void dodajGrad(Grad grad) {
+        if (gradovi.contains(grad))
+            throw new IllegalArgumentException("Grad vec postoji");
+        gradovi.add(grad);
+    }
+
+    public void dodajDrzavu(Drzava drzava) {
+        if (drzave.contains(drzava))
+            throw new IllegalArgumentException("Drzava vec postoji");
+        drzave.add(drzava);
+    }
+
+    public void izmijeniGrad(Grad grad) {
+        for (int i = 0; i < gradovi.size(); i++) {
+            if (gradovi.get(i).equals(grad)) {
+                gradovi.get(i).setNaziv(grad.getNaziv());
+                gradovi.get(i).setBrojStanovnika(grad.getBrojStanovnika());
+                gradovi.get(i).setDrzava(grad.getDrzava());
+                gradovi.get(i).setId(grad.getId());
+                break;
+            }
+        }
+        throw new IllegalArgumentException("Grad ne postoji");
+    }
 
 }
