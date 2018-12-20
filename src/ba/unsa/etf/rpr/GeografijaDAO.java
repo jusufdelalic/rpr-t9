@@ -25,6 +25,8 @@ public class GeografijaDAO {
     private ArrayList<Grad> gradovi;
     private ArrayList<Drzava> drzave;
 
+    public ArrayList<Drzava> getDrzave() { return drzave; }
+
     private static void initialize() {
         instance = new GeografijaDAO();
     }
@@ -36,7 +38,7 @@ public class GeografijaDAO {
         Grad manchester = new Grad(4, "Manchester", 441200, null);
         Grad graz = new Grad(5, "Graz", 286686, null);
         Drzava francuska = new Drzava(1, "Francuska", pariz);
-        Drzava engleska = new Drzava(2, "Engleska", london);
+        Drzava engleska = new Drzava(2, "Velika Britanija", london);
         Drzava austrija = new Drzava(3, "Austrija", bech);
         pariz.setDrzava(francuska);
         london.setDrzava(engleska);
@@ -83,8 +85,9 @@ public class GeografijaDAO {
         drzave = new ArrayList<>();
 
         try {
-            //Class.forName("com.mysql.jdbc.Driver");
+            //Class.forName("oracle.jdbc.driver.OracleDriver");
             conn = DriverManager.getConnection(url);
+
             kreirajTabele();
             napuniPodacima();
 /*
