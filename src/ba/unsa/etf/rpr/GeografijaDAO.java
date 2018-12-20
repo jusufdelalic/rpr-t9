@@ -59,8 +59,7 @@ public class GeografijaDAO {
                 + " id integer PRIMARY KEY,\n"
                 + " naziv text NOT NULL UNIQUE,\n"
                 + " brojStanovnika integer,\n"
-                + " drzava integer,\n"
-                + " FOREIGN KEY (drzava) REFERENCES drzave (id) ON DELETE CASCADE\n"
+                + " drzava integer REFERENCES drzave\n"
                 + ");";
 
         PreparedStatement stmt = conn.prepareStatement(sql);
@@ -71,8 +70,7 @@ public class GeografijaDAO {
         sql = "CREATE TABLE IF NOT EXISTS drzave(\n"
                 + " id integer PRIMARY KEY,\n"
                 + " naziv text NOT NULL UNIQUE,\n"
-                + " glavni_grad integer\n"
-                + " FOREIGN KEY (glavni_grad) REFERENCES gradovi(id) ON DELETE CASCADE\n"
+                + " glavni_grad integer REFERENCES gradovi\n"
                 + ");";
 
         stmt = conn.prepareStatement(sql);
@@ -85,11 +83,11 @@ public class GeografijaDAO {
         drzave = new ArrayList<>();
 
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            //Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection(url);
             kreirajTabele();
             napuniPodacima();
-
+/*
 
             upit = conn.prepareStatement("INSERT INTO grad VALUES (?, ?, ?, NULL)");
             for (var grad : gradovi) {
@@ -120,6 +118,7 @@ public class GeografijaDAO {
                 } catch (SQLException ignored) {
                 }
             }
+            */
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

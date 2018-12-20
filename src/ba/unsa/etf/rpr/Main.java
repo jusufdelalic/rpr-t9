@@ -30,7 +30,7 @@ public class Main {
         String rezultat = "";
 
         for(var grad : gradovi)
-            rezultat += (grad.getNaziv() + "(" + grad.getDrzava() + ")" + " - " + grad.getBrojStanovnika());
+            rezultat += (grad.getNaziv() + " (" + grad.getDrzava() + ")" + " - " + grad.getBrojStanovnika()) + "\n";
 
         return rezultat;
 
@@ -46,6 +46,7 @@ public class Main {
 
         con = DriverManager.getConnection("jdbc:mysql://   /HR","root","passwp");
         */
+        //GeografijaDAO instance = GeografijaDAO.getInstance();
 
         System.out.println("Gradovi su:\n" + ispisiGradove());
         glavniGrad();
