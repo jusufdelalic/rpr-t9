@@ -59,6 +59,21 @@ public class Main {
 
     }
 
+    public static void ispisiDrzave() {
+
+        GeografijaDAO geografija = GeografijaDAO.getInstance();
+
+        ArrayList<Drzava> drzave = geografija.getDrzave();
+
+        for(Drzava x : drzave) {
+
+            System.out.println(x.getNaziv() + ", glavni grad: " + x.getGlavniGrad().getNaziv()
+                    + ", broj stanovnika glavnog grada: " + x.getGlavniGrad().getBrojStanovnika());
+
+        }
+
+    }
+
 
 
     public static void main(String[] args) {
@@ -73,5 +88,7 @@ public class Main {
 
         System.out.println("Gradovi su:\n" + ispisiGradove());
         glavniGrad();
+        System.out.println("");
+        ispisiDrzave();
     }
 }

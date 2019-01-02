@@ -20,7 +20,7 @@ public class GeografijaDAO {
     private static GeografijaDAO instance = null;
     private static Connection conn;
     private Statement stmt;
-    private String url = "jdbc:sqlite:baza.db"; // ?????
+    private String url = "jdbc:sqlite:baza.db";
     private PreparedStatement upit;
     private ArrayList<Grad> gradovi;
     private ArrayList<Drzava> drzave;
@@ -55,7 +55,7 @@ public class GeografijaDAO {
         drzave.add(austrija);
     }
 
-    public void kreirajTabele () throws SQLException {
+   public void kreirajTabele () throws SQLException {
 
         String sql = "CREATE TABLE IF NOT EXISTS gradovi(\n"
                 + " id integer PRIMARY KEY,\n"
@@ -85,12 +85,13 @@ public class GeografijaDAO {
         drzave = new ArrayList<>();
 
         try {
+
             //Class.forName("oracle.jdbc.driver.OracleDriver");
             conn = DriverManager.getConnection(url);
 
             kreirajTabele();
             napuniPodacima();
-/*
+
 
             upit = conn.prepareStatement("INSERT INTO grad VALUES (?, ?, ?, NULL)");
             for (var grad : gradovi) {
@@ -121,8 +122,29 @@ public class GeografijaDAO {
                 } catch (SQLException ignored) {
                 }
             }
-            */
-        } catch (Exception e) {
+
+            upit = conn.prepareStatement("insert into drzava values (?,?,?)");
+                try {
+                    Grad Sarajevo = new Grad(6,"Sarajevo",400000,null);
+                    Drzava BiH = new Drzava(4,"BiH",Sarajevo);
+                    Sarajevo.setDrzava(BiH);
+                    drzave.add(BiH);
+                    gradovi.add(Sarajevo);
+
+                    upit.setInt(1,BiH.getId());
+                    upit.setString(2,BiH.getNaziv());
+                    upit.setInt(3,BiH.getGlavniGrad().getId());
+                    upit.executeUpdate();
+
+
+
+                }
+
+                catch (SQLException ignored) {
+                }
+
+        }
+        catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
@@ -157,7 +179,6 @@ public class GeografijaDAO {
 
         return gradovi;
     }
-
 
 
 
