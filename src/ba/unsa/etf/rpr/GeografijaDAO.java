@@ -93,7 +93,7 @@ public class GeografijaDAO {
             napuniPodacima();
 
 
-            upit = conn.prepareStatement("INSERT INTO grad VALUES (?, ?, ?, NULL)");
+            upit = conn.prepareStatement("INSERT INTO gradovi VALUES (?, ?, ?, NULL)");
             for (var grad : gradovi) {
                 try {
                     upit.setInt(1, grad.getId());
@@ -103,7 +103,7 @@ public class GeografijaDAO {
                 } catch (SQLException ignored) {
                 }
             }
-            upit = conn.prepareStatement("INSERT  INTO drzava VALUES(?, ?, ?)");
+            upit = conn.prepareStatement("INSERT  INTO drzave VALUES(?, ?, ?)");
             for (var drzava : drzave) {
                 try {
                     upit.setInt(1, drzava.getId());
@@ -113,7 +113,7 @@ public class GeografijaDAO {
                 } catch (SQLException ignored) {
                 }
             }
-            upit = conn.prepareStatement("UPDATE grad SET drzava = ? WHERE id = ?");
+            upit = conn.prepareStatement("UPDATE gradovi SET drzava = ? WHERE id = ?");
             for (var grad : gradovi) {
                 try {
                     upit.setInt(1, grad.getDrzava().getId());
@@ -123,7 +123,7 @@ public class GeografijaDAO {
                 }
             }
 
-            upit = conn.prepareStatement("insert into drzava values (?,?,?)");
+            upit = conn.prepareStatement("insert into drzave values (?,?,?)");
                 try {
                     Grad Sarajevo = new Grad(6,"Sarajevo",400000,null);
                     Drzava BiH = new Drzava(4,"BiH",Sarajevo);
