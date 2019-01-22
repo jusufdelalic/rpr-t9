@@ -25,6 +25,34 @@ public class GeografijaDAO {
     private ArrayList<Grad> gradovi;
     private ArrayList<Drzava> drzave;
 
+    private int dajIDDrzave(String nazivDrzave) {
+
+        int id = -1;
+
+        try {
+            String upit = "select id from drzave where naziv = nazivDrzave";
+
+            Statement st = conn.createStatement();
+
+            ResultSet rezultat =  st.executeQuery(upit);
+
+
+            //while (rezultat.next()) // ne iteriramo jer je vracen samo jedan red sa jednom kolonom
+            //{
+                id = rezultat.getInt("id");
+
+            //}
+            st.close();
+        }
+
+        catch (Exception e) {
+
+        }
+
+        return id;
+
+    }
+
     public ArrayList<Drzava> getDrzave() { return drzave; }
 
     private static void initialize() {
@@ -32,11 +60,11 @@ public class GeografijaDAO {
     }
 
     private void napuniPodacima() {
-        Grad pariz = new Grad(1, "Pariz", 2229621, null);
-        Grad london = new Grad(2, "London", 7355400, null);
-        Grad bech = new Grad(3, "Beč", 1867582, null);
-        Grad manchester = new Grad(4, "Manchester", 441200, null);
-        Grad graz = new Grad(5, "Graz", 286686, null);
+        Grad pariz = new Grad(1, "Pariz", 2206488, null);
+        Grad london = new Grad(2, "London", 8825000, null);
+        Grad bech = new Grad(3, "Beč", 1899055, null);
+        Grad manchester = new Grad(4, "Manchester", 545500, null);
+        Grad graz = new Grad(5, "Graz", 280200, null);
         Drzava francuska = new Drzava(1, "Francuska", pariz);
         Drzava engleska = new Drzava(2, "Velika Britanija", london);
         Drzava austrija = new Drzava(3, "Austrija", bech);
@@ -93,7 +121,9 @@ public class GeografijaDAO {
             napuniPodacima();
 
 
-            upit = conn.prepareStatement("INSERT INTO gradovi VALUES (?, ?, ?, NULL)");
+            upit = conn.prepareStatement("INSERT INTO gradovi VALUES (?, ?, ?, NULL)"); // ne unosimo cetvrtu kolonu jer jos nije
+                                                                                            // kreirana tabela drzave
+                                                                                            // i primarni kljuc ne bi bio validan
             for (var grad : gradovi) {
                 try {
                     upit.setInt(1, grad.getId());
@@ -103,7 +133,8 @@ public class GeografijaDAO {
                 } catch (SQLException ignored) {
                 }
             }
-            upit = conn.prepareStatement("INSERT  INTO drzave VALUES(?, ?, ?)");
+            upit = conn.prepareStatement("INSERT  INTO drzave VALUES(?, ?, ?)"); // mozemo unositi podatke i za straani kljuc
+                                                                                     // glavni grad jer postoje gradovi
             for (var drzava : drzave) {
                 try {
                     upit.setInt(1, drzava.getId());
@@ -113,17 +144,19 @@ public class GeografijaDAO {
                 } catch (SQLException ignored) {
                 }
             }
-            upit = conn.prepareStatement("UPDATE gradovi SET drzava = ? WHERE id = ?");
+            upit = conn.prepareStatement("UPDATE gradovi SET drzava = ? WHERE id = ?"); // azuriranje tabele za strani kljuc "drzave"
+                                                                                            // u tabeli gradovi
             for (var grad : gradovi) {
                 try {
                     upit.setInt(1, grad.getDrzava().getId());
                     upit.setInt(2, grad.getId());
-                    upit.executeUpdate();
+                    upit.executeUpdate(); // izvrsavanje upita
                 } catch (SQLException ignored) {
                 }
             }
 
-            upit = conn.prepareStatement("insert into drzave values (?,?,?)");
+            /*
+                upit = conn.prepareStatement("insert into drzave values (?,?,?)");
                 try {
                     Grad Sarajevo = new Grad(6,"Sarajevo",400000,null);
                     Drzava BiH = new Drzava(4,"BiH",Sarajevo);
@@ -142,7 +175,7 @@ public class GeografijaDAO {
 
                 catch (SQLException ignored) {
                 }
-
+*/
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
@@ -166,6 +199,36 @@ public class GeografijaDAO {
                 break;
             }
         }
+
+    int j = 0;
+
+        for(j=0; j<gradovi.size(); j++) {
+            if (gradovi.get(j).getDrzava().getNaziv().equals(drzava)) {
+                gradovi.remove(j);
+                j--;
+            }
+        }
+
+        // Brisanje iz baze podataka...
+
+        int id = dajIDDrzave (drzava);
+
+        try {
+            upit = conn.prepareStatement("delete from gradovi where drzava = id");
+            upit.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        try {
+            upit = conn.prepareStatement("delete from drzave where drzava = id");
+            upit.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     public ArrayList<Grad> gradovi() {
@@ -173,7 +236,7 @@ public class GeografijaDAO {
         for(int i=0; i<gradovi.size(); i++)
             for(int j=i+1; j<gradovi.size(); j++) {
 
-                if(gradovi.get(j).getBrojStanovnika() > gradovi.get(i).getBrojStanovnika())
+                if(gradovi.get(j).getBrojStanovnika() > gradovi.get(i).getBrojStanovnika()) // sortiranje...
                     Collections.swap(gradovi, i, j);
             }
 
@@ -199,28 +262,94 @@ public class GeografijaDAO {
     }
 
     public void dodajGrad(Grad grad) {
-        if (gradovi.contains(grad))
-            throw new IllegalArgumentException("Grad vec postoji");
-        gradovi.add(grad);
+
+
+        /*try {
+            PreparedStatement dodajGrad = conn.prepareStatement("INSERT INTO gradovi VALUES (?,?,?,?)");
+
+            dodajGrad.setInt(1,grad.getId());
+            dodajGrad.setString(2,grad.getNaziv());
+            dodajGrad.setInt(3,grad.getBrojStanovnika());
+            dodajGrad.setInt(4,grad.getDrzava().getId());
+
+            gradovi.add(grad);
+
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+*/
+
+        if(!gradovi.contains(grad))
+            gradovi.add(grad);
+
+
     }
 
     public void dodajDrzavu(Drzava drzava) {
-        if (drzave.contains(drzava))
-            throw new IllegalArgumentException("Drzava vec postoji");
-        drzave.add(drzava);
+
+
+
+        /*try {
+            PreparedStatement dodajDrzavu = conn.prepareStatement("INSERT INTO DRZAVA VALUES (?,?,?)");
+
+            dodajDrzavu.setInt(1,drzava.getId());
+            dodajDrzavu.setString(2,drzava.getNaziv());
+            dodajDrzavu.setInt(3,drzava.getGlavniGrad().getId());
+
+            drzave.add(drzava);
+
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }*/
+
+
+        if(!drzave.contains(drzava))
+            drzave.add(drzava);
+
+
+
     }
 
     public void izmijeniGrad(Grad grad) {
-        for (int i = 0; i < gradovi.size(); i++) {
-            if (gradovi.get(i).equals(grad)) {
+
+
+        // Izmjena u bazi...
+                try {
+                    PreparedStatement promijeniGrad = conn.prepareStatement("UPDATE GRADOVI SET NAZIV = ?, brojStanovnika = ?," +
+                            " drzava = ? WHERE id = ?");
+
+                    promijeniGrad.setInt(4,grad.getId()); // gdje mijenjamo vrijednost...
+                    promijeniGrad.setString(1,grad.getNaziv());
+                    promijeniGrad.setInt(2,grad.getBrojStanovnika());
+                    promijeniGrad.setInt(3,grad.getDrzava().getId());
+
+
+
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                // Izmjena i u array list...
+
+
+        for(int i=0; i<gradovi.size(); i++) {
+
+            if(gradovi.get(i).getId() == grad.getId()) {
                 gradovi.get(i).setNaziv(grad.getNaziv());
                 gradovi.get(i).setBrojStanovnika(grad.getBrojStanovnika());
                 gradovi.get(i).setDrzava(grad.getDrzava());
-                gradovi.get(i).setId(grad.getId());
-                break;
+
+            }
+
+        }
+
+
             }
         }
-        throw new IllegalArgumentException("Grad ne postoji");
-    }
 
-}
+
+
